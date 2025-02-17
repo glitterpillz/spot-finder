@@ -7,6 +7,7 @@ const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 const { where } = require("sequelize");
 
+// DELETE REVIEW IMAGE
 router.delete("/:reviewId/images/:imageId", requireAuth, async (req, res) => {
   const userId = req.user.id;
   const { reviewId, imageId } = req.params;
@@ -34,6 +35,8 @@ router.delete("/:reviewId/images/:imageId", requireAuth, async (req, res) => {
   return res.status(200).json({ message: "Successfully deleted" });
 });
 
+
+// POST REVIEW IMAGE
 router.post("/:reviewId/images", requireAuth, async (req, res) => {
   const userId = req.user.id;
   const { reviewId } = req.params;
@@ -66,6 +69,8 @@ router.post("/:reviewId/images", requireAuth, async (req, res) => {
   res.status(201).json(newReviewImage);
 });
 
+
+// EDIT REVIEW
 router.put(
   "/:reviewId",
   requireAuth,
@@ -114,6 +119,7 @@ router.put(
 );
 
 
+// DELETE REVIEW
 router.delete("/:reviewId", requireAuth, async (req, res) => {
   const userId = req.user.id;
   const { reviewId } = req.params;
@@ -133,6 +139,8 @@ router.delete("/:reviewId", requireAuth, async (req, res) => {
   return res.status(200).json({ message: "Successfully deleted" });
 });
 
+
+// POST NEW REVIEW
 router.post(
   "/:spotId",
   requireAuth,
@@ -184,49 +192,5 @@ router.post(
   }
 );
 
-
-// router.post(
-//   "/:spotId",
-//   requireAuth,
-//   [
-//     check("review")
-//       .exists({ checkFalsy: true })
-//       .notEmpty()
-//       .withMessage("Review text is required"),
-//     check("stars")
-//       .exists({ checkFalsy: true })
-//       .isInt({ min: 1, max: 5 })
-//       .withMessage("Stars must be an integer from 1 to 5"),
-//     handleValidationErrors,
-//   ],
-//   async (req, res) => {
-//     const userId = req.user.id;
-//     const { spotId } = req.params;
-//     const { review, stars } = req.body;
-
-//     const spot = await Spot.findOne({ where: { id: spotId } });
-
-//     if (!spot) {
-//       return res.status(404).json({ message: "Spot couldn't be found" });
-//     }
-
-//     const allReviews = await Review.findAll({ where: { userId, spotId } });
-
-//     if (allReviews.length !== 0) {
-//       return res
-//         .status(500)
-//         .json({ message: "User already has a review for this spot" });
-//     }
-
-//     const newReview = await Review.create({
-//       userId,
-//       spotId,
-//       review,
-//       stars,
-//     });
-
-//     return res.status(201).json(newReview);
-//   }
-// );
 
 module.exports = router;
