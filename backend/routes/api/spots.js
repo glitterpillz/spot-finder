@@ -135,45 +135,62 @@ router.get("/:spotId", async (req, res) => {
 
 
 // POST SPOT IMAGES
-router.post("/:spotId/images", requireAuth, async (req, res) => {
-  const userId = req.user.id;
-  const { spotId } = req.params;
-  const { url } = req.body;
+// router.post("/:spotId/images", requireAuth, async (req, res) => {
+//   const userId = req.user.id;
+//   const { spotId } = req.params;
+//   const { url } = req.body;
 
-  const spot = await Spot.findOne({
-    where: {
-      id: spotId,
-    },
-  });
+//   const spot = await Spot.findOne({
+//     where: {
+//       id: spotId,
+//     },
+//   });
 
-  if (!spot) {
-    return res.status(404).json({ message: "Spot couldn't be found" });
+//   if (!spot) {
+//     return res.status(404).json({ message: "Spot couldn't be found" });
+//   }
+
+//   if (spot.ownerId !== userId) {
+//     return res.status(403).json({ message: "Forbidden" });
+//   }
+
+//   const allSpotImages = await SpotImage.findAll({
+//     where: {
+//       spotId,
+//     },
+//   });
+
+//   if (allSpotImages.length >= 10) {
+//     return res.status(403).json({
+//       message: "Maximum number of images for this resource was reached",
+//     });
+//   }
+
+//   const newSpotImage = await SpotImage.create({
+//     spotId,
+//     url,
+//     preview: true,
+//   });
+
+//   res.status(201).json(newSpotImage);
+// });
+const { singleMulterUpload, awsUploadFile } = require("../../awsS3"); // Import AWS functions
+
+// POST SPOT IMAGES (Updated)
+router.post("/:spotId/images", requireAuth, singleMulterUpload("image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
   }
 
-  if (spot.ownerId !== userId) {
-    return res.status(403).json({ message: "Forbidden" });
+  try {
+    const uploadResult = await awsUploadFile(req.file);
+    res.status(200).json(uploadResult);
+  } catch (error) {
+    console.error("AWS upload error:", error);
+    res.status(500).json({ message: "Failed to upload file to AWS", error: error.message });
   }
-
-  const allSpotImages = await SpotImage.findAll({
-    where: {
-      spotId,
-    },
-  });
-
-  if (allSpotImages.length >= 10) {
-    return res.status(403).json({
-      message: "Maximum number of images for this resource was reached",
-    });
-  }
-
-  const newSpotImage = await SpotImage.create({
-    spotId,
-    url,
-    preview: true,
-  });
-
-  res.status(201).json(newSpotImage);
 });
+
 
 
 // EDIT SPOT
