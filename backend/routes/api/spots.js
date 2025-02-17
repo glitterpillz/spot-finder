@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { handleValidationErrors } = require("../../utils/validation");
 const { requireAuth } = require("../../utils/auth");
 const { check, query } = require("express-validator");
+const { Op } = require("sequelize");
 
 const {
   Spot,
@@ -134,46 +135,6 @@ router.get("/:spotId", async (req, res) => {
 });
 
 
-// POST SPOT IMAGES
-// router.post("/:spotId/images", requireAuth, async (req, res) => {
-//   const userId = req.user.id;
-//   const { spotId } = req.params;
-//   const { url } = req.body;
-
-//   const spot = await Spot.findOne({
-//     where: {
-//       id: spotId,
-//     },
-//   });
-
-//   if (!spot) {
-//     return res.status(404).json({ message: "Spot couldn't be found" });
-//   }
-
-//   if (spot.ownerId !== userId) {
-//     return res.status(403).json({ message: "Forbidden" });
-//   }
-
-//   const allSpotImages = await SpotImage.findAll({
-//     where: {
-//       spotId,
-//     },
-//   });
-
-//   if (allSpotImages.length >= 10) {
-//     return res.status(403).json({
-//       message: "Maximum number of images for this resource was reached",
-//     });
-//   }
-
-//   const newSpotImage = await SpotImage.create({
-//     spotId,
-//     url,
-//     preview: true,
-//   });
-
-//   res.status(201).json(newSpotImage);
-// });
 const { singleMulterUpload, awsUploadFile } = require("../../awsS3"); // Import AWS functions
 
 // POST SPOT IMAGES (Updated)
@@ -340,39 +301,129 @@ router.get(
   ],
   async (req, res) => {
     try {
-      let page = parseInt(req.query.page) || 1;
-      let size = parseInt(req.query.size) || 20;
+      let { page, size, minPrice, maxPrice } = req.query;
+
+      // Set pagination defaults
+      page = parseInt(page) || 1;
+      size = parseInt(size) || 20;
+      const limit = size;
+      const offset = (page - 1) * size;
 
       let where = {};
 
-      if (req.query.minPrice) {
-        where.price = parseFloat(req.query.minPrice);
+      // Apply price filtering if provided
+      if (minPrice && maxPrice) {
+        where.price = { [Op.between]: [parseFloat(minPrice), parseFloat(maxPrice)] };
+      } else if (minPrice) {
+        where.price = { [Op.gte]: parseFloat(minPrice) };
+      } else if (maxPrice) {
+        where.price = { [Op.lte]: parseFloat(maxPrice) };
       }
-
-      if (req.query.maxPrice) {
-        where.price = parseFloat(req.query.maxPrice);
-      }
-
-      let limit = size;
-      let offset = (page - 1) * size;
 
       const spots = await Spot.findAll({
         where,
-        offset,
         limit,
+        offset,
+        include: [
+          {
+            model: SpotImage,
+            as: "SpotImages",
+            attributes: ["url", "preview"],
+          },
+        ],
       });
+
+      // Add average rating and preview image to each spot
+      const formattedSpots = await Promise.all(
+        spots.map(async (spot) => {
+          const avgRating = await spot.getAvgRating();
+          const previewImage = spot.SpotImages.find((img) => img.preview)?.url || null;
+          return {
+            ...spot.toJSON(),
+            avgRating,
+            previewImage,
+          };
+        })
+      );
+
       res.status(200).json({
-        Spots: spots,
-        page: page,
-        size: size,
+        Spots: formattedSpots,
+        page,
+        size,
       });
     } catch (err) {
+      console.error("Error fetching spots:", err);
       res.status(500).json({
-        message: "Unexpected error: skill issue",
+        message: "Unexpected error",
       });
     }
   }
 );
+
+// router.get(
+//   "/",
+//   [
+//     check("page")
+//       .optional()
+//       .isInt({ min: 1 })
+//       .withMessage("Page must be greater than or equal to 1"),
+//     check("size")
+//       .optional()
+//       .isInt({ min: 1, max: 20 })
+//       .withMessage("Size must be between 1 and 20"),
+//     check("minPrice")
+//       .optional()
+//       .isFloat({ min: 0 })
+//       .withMessage("Minimum price must be greater than or equal to 0"),
+//     check("maxPrice")
+//       .optional()
+//       .isFloat({ min: 0 })
+//       .withMessage("Maximum price must be greater than or equal to 0"),
+//     handleValidationErrors,
+//   ],
+//   async (req, res) => {
+//     try {
+//       let page = parseInt(req.query.page) || 1;
+//       let size = parseInt(req.query.size) || 20;
+
+//       let where = {};
+
+//       if (req.query.minPrice) {
+//         where.price = parseFloat(req.query.minPrice);
+//       }
+
+//       if (req.query.maxPrice) {
+//         where.price = parseFloat(req.query.maxPrice);
+//       }
+
+//       let limit = size;
+//       let offset = (page - 1) * size;
+
+//       const spots = await Spot.findAll({
+//         where,
+//         offset,
+//         limit,
+//       });
+
+//       spots.forEach((spot) => {
+//         avgRating = spot.avgRating();
+//         numReviews = spot.numReviews();
+//       })
+
+//       res.status(200).json({
+//         Spots: spots,
+//         avgRating,
+//         numReviews,
+//         page: page,
+//         size: size,
+//       });
+//     } catch (err) {
+//       res.status(500).json({
+//         message: "Unexpected error: skill issue",
+//       });
+//     }
+//   }
+// );
 
 
 // POST NEW SPOT
