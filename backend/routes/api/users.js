@@ -34,6 +34,7 @@ const validateSignup = [
   handleValidationErrors,
 ];
 
+// SIGN UP USER
 router.post("/signup", validateSignup, async (req, res) => {
   try {
     const { firstName, lastName, email, password, username } = req.body;
@@ -67,30 +68,31 @@ router.post("/signup", validateSignup, async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
-  const { firstName, lastName, email, password, username } = req.body;
-  const hashedPassword = bcrypt.hashSync(password);
-  const user = await User.create({
-    firstName,
-    lastName,
-    email,
-    username,
-    hashedPassword,
-  });
 
-  const safeUser = {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    username: user.username,
-  };
+// router.post("/", async (req, res) => {
+//   const { firstName, lastName, email, password, username } = req.body;
+//   const hashedPassword = bcrypt.hashSync(password);
+//   const user = await User.create({
+//     firstName,
+//     lastName,
+//     email,
+//     username,
+//     hashedPassword,
+//   });
 
-  await setTokenCookie(res, safeUser);
+//   const safeUser = {
+//     id: user.id,
+//     firstName: user.firstName,
+//     lastName: user.lastName,
+//     email: user.email,
+//     username: user.username,
+//   };
 
-  return res.json({
-    user: safeUser,
-  });
-});
+//   await setTokenCookie(res, safeUser);
+
+//   return res.json({
+//     user: safeUser,
+//   });
+// });
 
 module.exports = router;

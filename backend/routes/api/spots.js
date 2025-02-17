@@ -11,6 +11,7 @@ const {
   ReviewImage,
 } = require("../../db/models");
 
+// DELETE SPOT IMAGE
 router.delete("/:spotId/images/:imageId", requireAuth, async (req, res) => {
   const ownerId = req.user.id;
   const { spotId, imageId } = req.params;
@@ -47,6 +48,8 @@ router.delete("/:spotId/images/:imageId", requireAuth, async (req, res) => {
   });
 });
 
+
+// GET SPOT REVIEWS
 router.get("/:spotId/reviews", async (req, res) => {
   try {
     const spotId = req.params.spotId;
@@ -77,6 +80,8 @@ router.get("/:spotId/reviews", async (req, res) => {
   }
 });
 
+
+// GET SPOT BY ID
 router.get("/:spotId", async (req, res) => {
   try {
     const spotId = req.params.spotId;
@@ -121,6 +126,8 @@ router.get("/:spotId", async (req, res) => {
   }
 });
 
+
+// POST SPOT IMAGES
 router.post("/:spotId/images", requireAuth, async (req, res) => {
   const userId = req.user.id;
   const { spotId } = req.params;
@@ -161,6 +168,8 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
   res.status(201).json(newSpotImage);
 });
 
+
+// EDIT SPOT
 router.put(
   "/:spotId",
   requireAuth,
@@ -181,14 +190,6 @@ router.put(
       .exists({ checkFalsey: true })
       .isLength({ min: 1 })
       .withMessage("Country is required"),
-    check("lat")
-      .exists({ checkFalsey: true })
-      .isFloat({ min: -90, max: 90 })
-      .withMessage("Latitude must be within -90 and 90"),
-    check("lng")
-      .exists({ checkFalsey: true })
-      .isFloat({ min: -180, max: 180 })
-      .withMessage("Longitude must be within -180 and 180"),
     check("name")
       .exists({ checkFalsey: true })
       .isLength({ max: 50 })
@@ -211,8 +212,6 @@ router.put(
       city,
       state,
       country,
-      lat,
-      lng,
       name,
       description,
       price,
@@ -243,8 +242,6 @@ router.put(
     spotToUpdate.city = city;
     spotToUpdate.state = state;
     spotToUpdate.country = country;
-    spotToUpdate.lat = lat;
-    spotToUpdate.lng = lng;
     spotToUpdate.name = name;
     spotToUpdate.description = description;
     spotToUpdate.price = price;
@@ -257,6 +254,7 @@ router.put(
 );
 
 
+// DELETE SPOT
 router.delete("/:spotId", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -293,6 +291,8 @@ router.delete("/:spotId", requireAuth, async (req, res) => {
   }
 });
 
+
+// GET SPOTS
 router.get(
   "/",
   [
@@ -304,22 +304,6 @@ router.get(
       .optional()
       .isInt({ min: 1, max: 20 })
       .withMessage("Size must be between 1 and 20"),
-    check("minLat")
-      .optional()
-      .isFloat({ min: -90, max: 90 })
-      .withMessage("Minimum latitude is invalid"),
-    check("maxLat")
-      .optional()
-      .isFloat({ min: -90, max: 90 })
-      .withMessage("Maximum latitude is invalid"),
-    check("minLng")
-      .optional()
-      .isFloat({ min: -180, max: 180 })
-      .withMessage("Minimum longitude is invalid"),
-    check("maxLng")
-      .optional()
-      .isFloat({ min: -180, max: 180 })
-      .withMessage("Maximum longitude is invalid"),
     check("minPrice")
       .optional()
       .isFloat({ min: 0 })
@@ -336,22 +320,6 @@ router.get(
       let size = parseInt(req.query.size) || 20;
 
       let where = {};
-
-      if (req.query.minLat) {
-        where.lat = parseFloat(req.query.minLat);
-      }
-
-      if (req.query.maxLat) {
-        where.lat = parseFloat(req.query.maxLat);
-      }
-
-      if (req.query.minLng) {
-        where.lng = parseFloat(req.query.minLng);
-      }
-
-      if (req.query.maxLng) {
-        where.lng = parseFloat(req.query.maxLng);
-      }
 
       if (req.query.minPrice) {
         where.price = parseFloat(req.query.minPrice);
@@ -382,6 +350,8 @@ router.get(
   }
 );
 
+
+// POST NEW SPOT
 router.post(
   "/",
   requireAuth,
@@ -402,14 +372,6 @@ router.post(
       .exists({ checkFalsey: true })
       .isLength({ min: 1 })
       .withMessage("Country is required"),
-    check("lat")
-      .exists({ checkFalsey: true })
-      .isFloat({ min: -90, max: 90 })
-      .withMessage("Latitude must be within -90 and 90"),
-    check("lng")
-      .exists({ checkFalsey: true })
-      .isFloat({ min: -180, max: 180 })
-      .withMessage("Longitude must be within -180 and 180"),
     check("name")
       .exists({ checkFalsey: true })
       .isLength({ max: 50 })
@@ -431,8 +393,6 @@ router.post(
         city,
         state,
         country,
-        lat,
-        lng,
         name,
         description,
         price,
@@ -446,8 +406,6 @@ router.post(
         city,
         state,
         country,
-        lat,
-        lng,
         name,
         description,
         price,
