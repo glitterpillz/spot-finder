@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         raw: true,
       });
 
-      return reviews[0].avgRating ? parseFloat(reviews[0].avgRating).toFixed(2) : "No ratings yet";
+      return reviews[0].avgRating ? parseFloat(reviews[0].avgRating).toFixed(2) : "New";
     }
 
     async getNumReviews() {

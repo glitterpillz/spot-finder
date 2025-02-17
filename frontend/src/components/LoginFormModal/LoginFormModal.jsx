@@ -1,0 +1,104 @@
+import './LoginForm.css';
+import * as sessionActions from '../../store/session';
+
+import { useState } from 'react';
+import { useDispatch } from 'react-redux'
+import { useModal } from '../../context/Modal';
+
+
+function LoginFormModal() {
+    const dispatch = useDispatch();
+    
+    const [credential, setCredential] = useState('');
+    const [password, setPassword] = useState('');
+    const [errors, setErrors] = useState({});
+    const { closeModal } = useModal();
+
+    const isValid = () => credential.length >= 4 && password.length >= 6;
+
+    const demoUser = {
+        credential: 'demo@example.com',
+        password: 'password123'
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setErrors({});
+
+        if (isValid()) {
+            return dispatch(sessionActions.login({
+                credential, password 
+            })).then(closeModal)
+            .catch(async (res) => {
+                const data = await res.json();
+                if (data && data.errors) {
+                    setErrors({
+                        credential: data.errors.credential || 'The provided credentials were invalid'
+                    });
+                }
+            });
+        } else {
+            setErrors({
+                credential: credential.length < 4 ? 'Username or Email must be as least 4 characters' : '',
+                password: password.length < 6 ? 'Password must be at least 6 characters' : '',
+            })
+        }
+
+    };
+
+    const handleDemoLogin = () => {
+        setErrors({});
+        return dispatch(sessionActions.login(demoUser))
+            .then(closeModal)
+            .catch(async (res) => {
+                const data = await res.json();
+                if (data && data.errors) {
+                    setErrors(data.errors);
+                }
+            });
+    };
+
+    return (
+        <div className='login-container'>
+
+            <div className='login-form'>
+                <h1>Log In</h1>
+                <form onSubmit={handleSubmit}>
+                    <label>
+                        Username or Email
+                        <input
+                            type='text'
+                            value={credential}
+                            onChange={(e) => setCredential(e.target.value)}
+                            required
+                        />
+                    </label>
+                    <label>
+                        Password
+                        <input
+                            type='password'
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </label>
+                    {errors.credential && <p>{errors.credential}</p>}
+                    {errors.password && <p>{errors.password}</p>}
+                    <div className='submit-btn'>
+                        <button type='submit' disabled={!isValid()}>Log In</button>
+                    </div>
+                    <br />
+                    <a 
+                        href='#'
+                        className='demo-user'
+                        onClick={handleDemoLogin}
+                    >
+                        Log in as Demo User
+                    </a>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+export default LoginFormModal;
