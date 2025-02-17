@@ -27,6 +27,7 @@ const validateLogin = [
   handleValidationErrors,
 ];
 
+// LOGIN USER
 router.post("/login", validateLogin, async (req, res, next) => {
   const { credential, password } = req.body;
 
@@ -62,6 +63,7 @@ router.post("/login", validateLogin, async (req, res, next) => {
   });
 });
 
+// GET USER SPOTS
 router.get("/spots", requireAuth, async (req, res) => {
   const userId = req.user.id;
 
@@ -70,6 +72,7 @@ router.get("/spots", requireAuth, async (req, res) => {
   res.json({ Spots: spots });
 });
 
+// GET USER REVIEWS
 router.get("/reviews", requireAuth, async (req, res) => {
   const userId = req.user.id;
 
@@ -89,8 +92,6 @@ router.get("/reviews", requireAuth, async (req, res) => {
           "city",
           "state",
           "country",
-          "lat",
-          "lng",
           "name",
           "price",
           "previewImage",
@@ -107,6 +108,7 @@ router.get("/reviews", requireAuth, async (req, res) => {
   res.json({ Reviews: reviews });
 });
 
+// GET USER BOOKINGS
 router.get("/bookings", requireAuth, async (req, res) => {
   const userId = req.user.id;
 
@@ -122,8 +124,6 @@ router.get("/bookings", requireAuth, async (req, res) => {
           "city",
           "state",
           "country",
-          "lat",
-          "lng",
           "name",
           "price",
           "previewImage",
@@ -135,12 +135,13 @@ router.get("/bookings", requireAuth, async (req, res) => {
   res.json({ Bookings: bookings });
 });
 
-
+// LOGOUT (DELETE SESSION)
 router.delete("/", (_req, res) => {
   res.clearCookie("token");
   return res.json({ message: "success" });
 });
 
+// GET CURRENT USER
 router.get("/", (req, res) => {
   const { user } = req;
   if (user) {
