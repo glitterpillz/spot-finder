@@ -17,6 +17,20 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "spotId",
       });
     }
+
+    async getAvgRating() {
+      const reviews = await this.getReviews({
+        attributes: [[sequelize.fn("AVG", sequelize.col("stars")), "avgRating"]],
+        raw: true,
+      });
+
+      return reviews[0].avgRating ? parseFloat(reviews[0].avgRating).toFixed(2) : "No ratings yet";
+    }
+
+    async getNumReviews() {
+      const count = await this.countReviews();
+      return count;
+    }
   }
   Spot.init(
     {
@@ -74,12 +88,6 @@ module.exports = (sequelize, DataTypes) => {
       price: {
         type: DataTypes.FLOAT,
         allowNull: false,
-      },
-      numReviews: {
-        type: DataTypes.INTEGER,
-      },
-      avgRating: {
-        type: DataTypes.FLOAT,
       },
       previewImage: {
         type: DataTypes.STRING,

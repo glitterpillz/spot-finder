@@ -119,7 +119,14 @@ router.get("/:spotId", async (req, res) => {
       });
     }
 
-    res.status(200).json(spot);
+    const avgRating = await spot.getAvgRating();
+    const numReviews = await spot.getNumReviews();
+
+    res.status(200).json({
+      ...spot.toJSON(),
+      avgRating,
+      numReviews,
+    });
   } catch (err) {
     console.error("Error fetching spot details: ", err);
     res.status(500).json({ message: "Error fetching spot details" });
