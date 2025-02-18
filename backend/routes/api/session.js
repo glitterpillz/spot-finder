@@ -1,6 +1,7 @@
 const express = require("express");
 const { Op, where } = require("sequelize");
 const bcrypt = require("bcryptjs");
+const { sequelize } = require("../../db/models");
 
 const {
   setTokenCookie,
@@ -64,12 +65,42 @@ router.post("/login", validateLogin, async (req, res, next) => {
 });
 
 // GET USER SPOTS
+// router.get("/spots", requireAuth, async (req, res) => {
+//   const userId = req.user.id;
+
+//   const spots = await Spot.findAll({ where: { ownerId: userId } });
+
+//   res.json({ Spots: spots });
+// });
 router.get("/spots", requireAuth, async (req, res) => {
   const userId = req.user.id;
 
-  const spots = await Spot.findAll({ where: { ownerId: userId } });
+  const spots = await Spot.findAll({
+    where: { ownerId: userId },
+  });
 
-  res.json({ Spots: spots });
+  // Calculate avgRating and numReviews
+  const formattedSpots = await Promise.all(
+    spots.map(async (spot) => {
+      const numReviews = await Review.count({ where: { spotId: spot.id } });
+      const avgRating = await Review.findOne({
+        where: { spotId: spot.id },
+        attributes: [[sequelize.fn("AVG", sequelize.col("stars")), "avgRating"]],
+        raw: true,
+      });
+
+      const previewImage = spot.previewImage || null;
+
+      return {
+        ...spot.toJSON(),
+        numReviews,
+        avgRating: avgRating ? parseFloat(avgRating.avgRating).toFixed(2) : "0.0",
+        previewImage,
+      };
+    })
+  );
+
+  res.json({ Spots: formattedSpots });
 });
 
 // GET USER REVIEWS
