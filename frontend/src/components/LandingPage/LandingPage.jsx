@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getAllSpots } from "../../store/spots";
+import lan from "./LandingPage.module.css"
 
 function LandingPage() {
     const dispatch = useDispatch();
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
     const [isLoaded, setIsLoaded] = useState(false);
     const { spots, loading, errors } = useSelector((state) => state.spots);
 
@@ -17,45 +18,48 @@ function LandingPage() {
     
 
     if (loading || !isLoaded) {
-        return <div>Loading...</div>;
+        return <div className={lan.loading}>Loading...</div>;
     }
 
     if (errors) {
-        return <div>Error: {errors}</div>;
+        return <div className={lan.error}>Error: {errors}</div>;
     }
 
     console.log("ALL THE SPOTS!!!!:", spots);
 
     return (
-        <div className="spots-container">
-            {spots.length > 0 ? (
-                spots.map((spot) => (
-                    <div
-                        key={spot.id}
-                        title={spot.name}
-                    >
-                        <div>
-                            <img src={spot.previewImage} alt={spot.name} />
-                            <div className="spot-details">
-                                <div className="spot-top">
-                                    <div className="spot-location">
-                                        {spot.city}, {spot.state}
-                                    </div>
-                                    <div className="spot-rating">
-                                        ⭐ {spot.avgRating ? spot.avgRating : "0.00"}
+        <div className={lan.mainContainer}>
+            <div className={lan.spotsContainer}>
+                {spots.length > 0 ? (
+                    spots.map((spot) => (
+                        <div
+                            key={spot.id}
+                            title={spot.name}
+                            className={lan.spotCard}
+                        >
+                            <div onClick={() => navigate("")}>
+                                <img className={lan.spotImage} src={spot.previewImage} alt={spot.name} />
+                                <div className={lan.spotDetails}>
+                                    <div className={lan.spotTop}>
+                                        <div className={lan.spotLocation}>
+                                            {spot.city}, {spot.state}
+                                        </div>
+                                        <div className={lan.spotRating}>
+                                            ⭐ {spot.avgRating ? spot.avgRating : "0.00"}
 
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="spot-price">
-                                    ${spot.price} night
+                                    <div className={lan.spotPrice}>
+                                        ${spot.price} / night
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                ))
-            ) : (
-                <div>No spots available</div>
-            )}
+                    ))
+                ) : (
+                    <div>No spots available</div>
+                )}
+            </div>
         </div>
     )
 }

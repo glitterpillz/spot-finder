@@ -1,3 +1,69 @@
-h1 {
-    color: white;
+body {
+    background-color: #c9e9ed;
+}
+
+.mainContainer {
+    text-align: center;
+    padding: 3rem;
+    background-color: #c9e9ed;
+}
+
+.spotsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+    max-width: 1200px; 
+    margin-left: auto; 
+    margin-right: auto; 
+}
+
+.spotCard {
+    max-width: 300px;
+    width: 100%; 
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    background-color: #f0f0f0;
+}
+
+.spotCard:hover {
+    transform: translateY(-5px);
+}
+
+.spotImage {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.spotDetails {
+    padding: 15px;
+}
+
+.spotTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.spotLocation {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.spotPrice {
+    text-align: left;
+    font-size: 18px;
+    color: #1da97f;
+}
+
+.spotRating {
+    color: #FF9800;
+    margin-top: 5px;
 }
