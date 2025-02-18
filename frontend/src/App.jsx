@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Navigation from "./components/Navigation/Navigation";
 import * as sessionActions from "./store/session"
 import LandingPage from "./components/LandingPage";
+import UserSpotsPage from "./components/UserSpotsPage";
 // import SpotPage from "./components/SpotPage/SpotPage";
 // import UserSpotsPage from "./components/UserSpotsPage/UserSpotsPage";
 // import SpotCreatePage from "./components/SpotsCreatePage/SpotCreatePage";
@@ -44,10 +45,10 @@ const router = createBrowserRouter([
       //   path: '/spots/new',
       //   element: <SpotCreatePage />
       // },
-      // {
-      //   path: '/user/spots',
-      //   element: <UserSpotsPage />,
-      // },
+      {
+        path: '/user/spots',
+        element: <UserSpotsPage />,
+      },
       // {
       //   path: '/user/spots/:spotId/edit',
       //   element: <EditSpotPage />

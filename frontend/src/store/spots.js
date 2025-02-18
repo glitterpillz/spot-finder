@@ -3,31 +3,11 @@ import { csrfFetch } from "./csrf";
 
 const initialState = {
     spots: [],
+    userSpots: { Spots: [] },
     spotDetails: null,
     loading: false,
     errors: null
 }
-
-
-// export const getAllSpots = createAsyncThunk(
-//     "spots/getAllSpots",
-//     async (_, { rejectWithValue }) => {
-//         try {
-//             const res = await fetch("/api/spots/");
-//             const text = await res.text();
-//             console.log("Raw response:", text);
-//             const data = await res.json();
-
-//             if (!res.ok) {
-//                 throw new Error(`Error getting spots: ${data.message}`);
-//             }
-
-//             return data.Spots || data;
-//         } catch (error) {
-//             return rejectWithValue(error.message || 'Error fetching all spots');
-//         }
-//     }
-// );
 
 export const getAllSpots = createAsyncThunk(
     "spots/getAllSpots",
@@ -57,16 +37,16 @@ export const fetchUserSpots = createAsyncThunk(
         try {
             const res = await csrfFetch("/api/session/spots");
             const data = await res.json();
-
+    
             if (!res.ok) {
                 return rejectWithValue(data);
             }
-
-            return data;
+    
+            return data?.Spots || []; // Ensure it's an array
         } catch (error) {
             return rejectWithValue(error.message || "Error fetching user spots");
         }
-    }
+    }    
 )
 
 const spotsSlice = createSlice({
@@ -97,7 +77,7 @@ const spotsSlice = createSlice({
         })
         .addCase(fetchUserSpots.fulfilled, (state, action) => {
             state.loading = false;
-            state.spots = action.payload;
+            state.userSpots = action.payload || [];
         });
     }
 })
